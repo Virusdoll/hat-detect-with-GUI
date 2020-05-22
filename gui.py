@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from index import *
-
+from HatDetector import *
 
 class picture(QWidget):
     pic_url = ""
@@ -16,6 +16,7 @@ class picture(QWidget):
     def __init__(self, pic_url="", url_base = url_base):
         super(picture, self).__init__()
 
+        self.hatDetector = HatDetector()
         # 获取绝对路径
         self.url = url_base
         for i in url_base:
@@ -85,8 +86,7 @@ class picture(QWidget):
         loading = self.url+"resource/loading.gif"
         self.show_pic(loading)
         # 检测
-        hatDetector = HatDetector()
-        hatDetector.detectImageFile(self.pic_url, self.new_url)
+        self.hatDetector.detectImageFile(self.pic_url, self.new_url)
         self.show_pic(self.new_url)
 
     def show_pic(self, show_url):

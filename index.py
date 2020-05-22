@@ -8,10 +8,10 @@ from PyQt5.QtWidgets import *
 from gui import *
 from video_box import *
 from result import *
+from log import *
 
 class indexPage(QWidget):
     url_base = os.path.dirname(os.path.abspath(__file__))
-    # show_sub_win_signal = pyqtSignal()
     
     def __init__(self, url_base = url_base):
         QWidget.__init__(self)

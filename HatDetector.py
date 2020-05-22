@@ -610,7 +610,7 @@ class HatDetector(object):
 # for test
 if __name__ == "__main__":
     # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    hatDetector = HatDetector(HatDetector.DETECT_PERSON_BY_HOGSVM)
+    hatDetector = HatDetector(HatDetector.DETECT_PERSON_BY_NET)
 
     for i in range(11):
         code = i+1

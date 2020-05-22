@@ -7,8 +7,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from cv2 import *
-from HatDetector import HatDetector
-
+from HatDetector import *
 class VideoBox(QWidget):
 
     VIDEO_TYPE_OFFLINE = 0
@@ -24,7 +23,9 @@ class VideoBox(QWidget):
 
     def __init__(self, video_url="",url_base = url_base,video_type=VIDEO_TYPE_OFFLINE, auto_play=False):
         QWidget.__init__(self)
-        # self.resize(900, 600)
+        
+        self.hatDetector = HatDetector()
+
         self.video_url = video_url
         self.res = QLabel(self)
         self.res.setText("")
@@ -43,8 +44,6 @@ class VideoBox(QWidget):
         # 组件展示
         self.pictureLabel = QLabel(self)
         self.pictureLabel.setText("    显示视频")
-        # self.pictureLabel.setFixedSize(1000, 600)
-        # self.pictureLabel.setFixedSize(self.width(), self.height())
         init_image = QPixmap(self.url+"resource/hat.jpeg").scaled(self.width(), self.height())
         self.pictureLabel.setPixmap(init_image)
 
@@ -62,7 +61,6 @@ class VideoBox(QWidget):
         uploadBtn = QPushButton(self)
         uploadBtn.setText("上传并测试")
         uploadBtn.move(10, 50)
-        # uploadBtn.setStyleSheet("QPushButton{background:#33D1FF;}")
         uploadBtn.clicked.connect(self.uploadimage)
 
         control_box = QHBoxLayout()
@@ -84,14 +82,15 @@ class VideoBox(QWidget):
             self.set_timer_fps()
             if self.auto_play:
                 self.switch_video()
-            # self.videoWriter = VideoWriter('*.mp4', VideoWriter_fourcc('M', 'J', 'P', 'G'), self.fps, size)
-    
+           
+
     def openimage(self):
         imgName, imgType = QFileDialog.getOpenFileName(self, "打开视频", "", "*.mp4;;All Files(*)")
         init_video = QtGui.QPixmap(imgName).scaled(self.pictureLabel.width(), self.pictureLabel.height())
         self.pictureLabel.setPixmap(init_video)
         self.set_video(imgName, VideoBox.VIDEO_TYPE_OFFLINE, False)
         self.video_url = imgName
+
 
     def uploadimage(self):
         button=QMessageBox.question(self,"Question",  
@@ -114,10 +113,9 @@ class VideoBox(QWidget):
         self.new_url = self.url + "resource/public/" + time_now + v_type
         # 缓冲图片
         loading = QPixmap(self.url+"resource/loading.gif").scaled(self.width(), self.height())
-        self.pictureLabel.setPixmap(init_image)
+        self.pictureLabel.setPixmap(loading)
         # 检测
-        hatDetector = HatDetector()
-        hatDetector.detectVideoFile(self.video_url, self.new_url)
+        self.hatDetector.detectVideoFile(self.video_url, self.new_url)
         # 设置播放文件为测试结果文件
         self.set_video(self.new_url, VideoBox.VIDEO_TYPE_OFFLINE, False)
 
