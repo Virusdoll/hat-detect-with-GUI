@@ -1,8 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from video_box import *
-from gui import *
+from log import MyButton
 import sys
 import os
 
@@ -40,22 +39,15 @@ class MyTable(QTableWidget):
             for file_name in file_list:  
                 file_name = file_name.split("/")[-1]
                 self.files.append(file_name)
-                # file_time = file_name.split("/")[-1].split(".")[0].split("_")
                 
         self.setRowCount(len(self.files))
 
         for i in range(len(self.files)):
-            btn = "table_button"+str(i)
-            self.btn = QPushButton(self)
             temp_data = self.files[i]
-            self.btn.setText(str(temp_data))
-            self.setCellWidget(i, 0, self.btn)
-            print(btn)
-            print(self.files[i])
-            
             file = self.url+"resource/public/"+temp_data
-            # 表格中的点击事件
-            self.btn.clicked.connect(lambda:os.startfile(file))
+            tmp_button = MyButton(file, str(temp_data))
+            self.setCellWidget(i, 0, tmp_button)
+
 
             # 表格中的时间显示
             temp_time = temp_data.split("/")[-1].split(".")[0].split("_")
@@ -64,21 +56,9 @@ class MyTable(QTableWidget):
             time_data = QTableWidgetItem(str(file_time))
             self.setItem(i, 1, time_data)
 
-            
-    def openFile(self, temp_data):
-        play_url = self.url+"resource/public/"+temp_data
-        print(play_url)
-        os.startfile(play_url)
-        # file_type = str(temp_data.split(".")[-1])
-        # if file_type is "mp4":
-        #     video.set_video(url, video.VIDEO_TYPE_OFFLINE, False)
-        # elif file_type == "jpg" or file_type == "png":
-        #     pic.show_pic(play_url)
-
-
+        
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     myTable = MyTable()
-    
     myTable.show()
     app.exit(app.exec_())

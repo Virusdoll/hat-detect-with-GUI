@@ -1,10 +1,24 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from video_box import *
-from gui import *
 import sys
 import os
+
+class MyButton(QPushButton):
+    def __init__(self, traget_dir, button_name):
+        QPushButton.__init__(self)
+        self.__traget_dir = traget_dir
+        self.__button_name = button_name
+        self.setText(self.__button_name)
+        self.clicked.connect(lambda:self.openFile(self.__traget_dir))
+    
+    def openFile(self, file):
+        print(file)
+        if sys.platform == "win32":
+            os.startfile(file)
+        else:
+            subprocess.call(["xdg-open", file])
+
 
 class MyLog(QTableWidget):
     url_base = os.path.dirname(os.path.abspath(__file__))
@@ -27,7 +41,6 @@ class MyLog(QTableWidget):
         self.setColumnCount(1)
 
         # 设置表头名称
-        # self.setColumnWidth(1, 350)
         self.setColumnWidth(0, 780)
         self.setHorizontalHeaderLabels(["日志"])
         self.table_sitting()
@@ -44,19 +57,10 @@ class MyLog(QTableWidget):
         self.setRowCount(len(self.files))
 
         for i in range(len(self.files)):
-            btn = "table_button"+str(i)
-            self.btn = QPushButton(self)
             temp_data = self.files[i]
-            self.btn.setText(str(temp_data))
-            self.setCellWidget(i, 0, self.btn)
             file = self.url+"resource/logs/"+temp_data
-            # 表格中的点击事件
-            self.btn.clicked.connect(lambda:os.startfile(file)) 
-            
-
-    def openFile(self, temp_data):
-        file = self.url+"resource/logs/"+temp_data
-        os.startfile(file)
+            tmp_button = MyButton(file, str(temp_data))
+            self.setCellWidget(i, 0, tmp_button)
 
 
 if __name__ == '__main__':
