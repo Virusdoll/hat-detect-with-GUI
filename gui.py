@@ -10,16 +10,19 @@ from index import *
 
 class picture(QWidget):
     pic_url = ""
+    new_url = ""
     url_base = os.path.dirname(os.path.abspath(__file__))
 
     def __init__(self, pic_url="", url_base = url_base):
         super(picture, self).__init__()
 
-        # 相对路径一直报错，所以获取绝对路径
+        # 获取绝对路径
         self.url = url_base
         for i in url_base:
             if(i == "\\"):
                 self.url = self.url + "/"
+
+        self.new_url = ""
 
         self.pic_url = pic_url
         self.resize(800, 600)
@@ -28,6 +31,7 @@ class picture(QWidget):
         self.res = QLabel(self)
         self.res.setText("")
         self.res.setFixedSize(600, 15)
+
         
         # 显示图片区域
         self.label = QLabel(self)
@@ -49,14 +53,12 @@ class picture(QWidget):
         uploadBtn = QPushButton(self)
         uploadBtn.setText("上传图片")
         uploadBtn.move(500, 500)
-        # uploadBtn.setStyleSheet("QPushButton{background:#33D1FF;}")
         uploadBtn.clicked.connect(self.uploadimage)
 
     # 打开图片的函数
     def openimage(self):
         imgName, imgType = QFileDialog.getOpenFileName(self, "打开图片", "", "*.jpg;;*.png;;All Files(*)")
-        jpg = QtGui.QPixmap(imgName).scaled(self.label.width(), self.label.height())
-        self.label.setPixmap(jpg)
+        self.show_pic(imgName)
         self.pic_url = imgName
 
     # 上传图片的函数
@@ -67,23 +69,33 @@ class picture(QWidget):
                                     QMessageBox.Ok)  
         if button==QMessageBox.Ok:  
             self.res.setText("上传成功！请等待检测结果！") 
-            # 调用检测函数,上传的图片地址为pic_url
-            # time_now = time.strftime("%Y%m%d%H%M%S", time.localtime())
-            # new_url = self.url+"resource/"+time_now+".jpg"
-            # hatDetector = HatDetector()
-            # hatDetector.detectImageFile(self.pic_url, new_url)
-            # resPic = QtGui.QPixmap(self.pic_url).scaled(self.label.width(), self.label.height())
-            # self.label.setPixmap(resPic)
+            self.detect()
         elif button==QMessageBox.Cancel:  
             self.label.setText("上传失败。请重新选择图片！")  
         else:  
             return  
 
+    # 显示测试完成的图片
+    def detect(self):
+        p_type = str(self.pic_url.split(".")[-1])
+        # 调用检测函数,上传的图片地址为pic_url
+        time_now = time.strftime("%Y%m%d%H%M%S", time.localtime())
+        self.new_url = self.url + "resource/public/" + time_now + p_type
+        # 缓冲图片
+        loading = self.url+"resource/loading.gif"
+        self.show_pic(loading)
+        # 检测
+        hatDetector = HatDetector()
+        hatDetector.detectImageFile(self.pic_url, self.new_url)
+        self.show_pic(self.new_url)
+
+    def show_pic(self, show_url):
+        resPic = QtGui.QPixmap(show_url).scaled(self.label.width(), self.label.height())
+        self.label.setPixmap(resPic)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     index = indexPage()
     my = picture()
     my.show()
-    # index.hide()
     sys.exit(app.exec_())

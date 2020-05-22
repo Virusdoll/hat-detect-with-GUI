@@ -20,6 +20,7 @@ class VideoBox(QWidget):
     url_base = os.path.dirname(os.path.abspath(__file__))
     video_url = ""
     url=""
+    new_url = ""
 
     def __init__(self, video_url="",url_base = url_base,video_type=VIDEO_TYPE_OFFLINE, auto_play=False):
         QWidget.__init__(self)
@@ -38,12 +39,13 @@ class VideoBox(QWidget):
             if(i == "\\"):
                 self.url = self.url + "/"
 
+        self.new_url = ""
         # 组件展示
         self.pictureLabel = QLabel(self)
         self.pictureLabel.setText("    显示视频")
         # self.pictureLabel.setFixedSize(1000, 600)
         # self.pictureLabel.setFixedSize(self.width(), self.height())
-        init_image = QPixmap("resource/hat.jpeg").scaled(self.width(), self.height())
+        init_image = QPixmap(self.url+"resource/hat.jpeg").scaled(self.width(), self.height())
         self.pictureLabel.setPixmap(init_image)
 
         self.playButton = QPushButton()
@@ -97,18 +99,27 @@ class VideoBox(QWidget):
                                     QMessageBox.Ok|QMessageBox.Cancel,  
                                     QMessageBox.Ok)  
         if button==QMessageBox.Ok:  
-            self.res.setText("上传成功！请等待检测结果！")             
-            # 调用检测函数,上传的图片地址为video_url
-            # time_now = time.strftime("%Y%m%d%H%M%S", time.localtime())
-            # new_url = self.url+"resource/"+time_now+".mp4"
-            # hatDetector = HatDetector()
-            # hatDetector.detectVideoFile(self.video_url, new_url)
-            # resPic = QtGui.QPixmap(self.video_url).scaled(self.label.width(), self.label.height())
-            # self.label.setPixmap(resPic) 
+            self.res.setText("上传成功！请等待检测结果！") 
+            self.play_video()            
         elif button==QMessageBox.Cancel:  
              self.res.setText("上传失败。请重新选择视频！")   
         else:  
             return  
+
+    # 上传文件进行检测并播放结果视频文件
+    def play_video(self):
+        v_type = str(self.video_url.split(".")[-1])
+        time_now = time.strftime("%Y%m%d%H%M%S", time.localtime())
+        # 新视频的url传给self.new_url
+        self.new_url = self.url + "resource/public/" + time_now + v_type
+        # 缓冲图片
+        loading = QPixmap(self.url+"resource/loading.gif").scaled(self.width(), self.height())
+        self.pictureLabel.setPixmap(init_image)
+        # 检测
+        hatDetector = HatDetector()
+        hatDetector.detectVideoFile(self.video_url, self.new_url)
+        # 设置播放文件为测试结果文件
+        self.set_video(self.new_url, VideoBox.VIDEO_TYPE_OFFLINE, False)
 
     def reset(self):
         self.timer.stop()
@@ -124,6 +135,7 @@ class VideoBox(QWidget):
         self.timer.set_fps(fps)
         self.playCapture.release()
 
+    # 设置播放文件
     def set_video(self, url, video_type=VIDEO_TYPE_OFFLINE, auto_play=False):
         self.reset()
         self.video_url = url
@@ -133,6 +145,7 @@ class VideoBox(QWidget):
         if self.auto_play:
             self.switch_video()
 
+    # 开始播放
     def play(self):
         if self.video_url == "" or self.video_url is None:
             return
@@ -142,6 +155,7 @@ class VideoBox(QWidget):
         self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
         self.status = VideoBox.STATUS_PLAYING
 
+    # 暂停播放
     def stop(self):
         if self.video_url == "" or self.video_url is None:
             return
@@ -152,6 +166,7 @@ class VideoBox(QWidget):
             self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
         self.status = VideoBox.STATUS_PAUSE
 
+    # 重新播放
     def re_play(self):
         if self.video_url == "" or self.video_url is None:
             return
@@ -210,7 +225,6 @@ class VideoBox(QWidget):
 
 
 class Communicate(QObject):
-
     signal = pyqtSignal(str)
 
 
@@ -243,6 +257,7 @@ class VideoTimer(QThread):
 
     def set_fps(self, fps):
         self.frequent = fps
+
 
 if __name__ == "__main__":
     mapp = QApplication(sys.argv)
